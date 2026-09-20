@@ -2,19 +2,21 @@
 
 ## What lives here
 
-Nothing yet — this directory documents the key layout. No private
-keys are checked in. The DEMO private seeds live in
-`examples/dev_keys.nim` (source code, clearly labeled non-production);
-the DEMO public keys that `premium_cli` embeds live in
+No keys are checked in. At runtime this directory may hold locally
+generated `license.seed` / `online.seed` files (gitignored) written by
+`mint_license.nim`; the fixed DEMO private seeds live in
+`examples/dev_keys.nim` (source code, `--demo-seed` only,
+non-production); the public keys that `premium_cli` embeds live in
 `examples/demo_pubkeys.nim`.
 
 ## Rules
 
 - **Public keys** (`demo_pubkeys.nim`): safe to embed in the app and
   to check in. They verify signatures but cannot create them.
-- **Private keys** (`dev_keys.nim` seeds): development fixtures only,
-  used by `mint_license.nim` and `mock_license_server.nim`. They are
-  NOT production-safe and must never sign real licenses.
+- **Private keys** (`dev_keys.nim` seeds, or generated `*.seed`
+  files): development fixtures only, used by `mint_license.nim` and
+  `mock_license_server.nim`. They are NOT production-safe and must
+  never sign real licenses.
 - **Production signing keys** belong on a protected signing system
   or HSM. They never appear in application source, in this directory,
   or in version control.

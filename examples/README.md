@@ -24,6 +24,35 @@ clue build examples/mock_license_server.nim --out:mock_license_server
 `mint_license` and `mock_license_server` are development fixtures and
 must never ship. `premium_cli` embeds only public keys.
 
+## Key lifecycle
+
+First run generates two fresh local keypairs (license + online) and
+saves their seeds under `examples/keys/` (gitignored, never commit).
+Embed the matching public keys and rebuild the CLI:
+
+```bash
+./mint_license --pubkeys-out:examples/demo_pubkeys.nim
+clue build examples/premium_cli.nim --out:premium_cli
+```
+
+Subsequent mints reuse the saved keys. Pass `--rotate` to throw them
+away and generate new ones (old tokens stop verifying; rewrite the
+pubkeys file and rebuild). The mock server loads `online.seed` from
+`--keys-dir` (default `examples/keys`) and falls back to the fixed
+demo seed with a warning when no file exists.
+
+Deterministic demo mode (fixed checked-in seeds, reproducible
+docs/tests, matches the shipped `demo_pubkeys.nim`):
+
+```bash
+./mint_license --demo-seed --jti:license-001 --plan:demo --days:30 \
+    --features:run --customer:example-customer
+```
+
+WARNING: demo seeds and generated local keys are NOT production-safe.
+Production licenses must be signed by a protected signing service
+or HSM.
+
 ## Mint a demo license
 
 ```bash
@@ -37,10 +66,6 @@ This prints a `token: <compact JWS>` line. Save it:
 ./mint_license --jti:license-001 --plan:demo --days:30 \
     --features:run --customer:example-customer | grep '^token: ' | cut -d' ' -f2 > license.lic
 ```
-
-WARNING: the demo signing key is checked in and NOT production-safe.
-Production licenses must be signed by a protected signing service
-or HSM.
 
 ## Offline validation
 

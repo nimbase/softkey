@@ -14,6 +14,7 @@
 
 
 ## Features
+- Based on [JOSE](https://github.com/nimbase/jose) & [Nimcypher](https://github.com/nimbase/nimcypher)
 - Signature-first license checks
 - Strict, predictable license contents
 - Client-side lifetime limits
@@ -26,23 +27,42 @@
 
 ## Feature details
 #### Signature-first license checks
-Every license is verified as a tamper-proof signed token against an approved key list before any of its contents are trusted.
+Every license is verified as a tamper-proof signed token against an approved key
+list before any of its contents are trusted.
+
 #### Strict, predictable license contents
-All required fields must be present and correctly typed, duplicate entries are rejected, and oversized tokens are refused.
+All required fields must be present and correctly typed, duplicate entries are rejected,
+and oversized tokens are refused.
+
 #### Client-side lifetime limits
-The app caps how long any license may last, with a small allowance for clock differences, so even a valid signature cannot grant a decades-long license.
+The app caps how long any license may last, with a small allowance for clock differences,
+so even a valid signature cannot grant a decades-long license.
+
 #### Reserved device binding
-Unbound licenses work today, while hardware-bound licenses are recognized as unsupported until that enforcement is built.
+Unbound licenses work today, while hardware-bound licenses are recognized as
+unsupported until that enforcement is built.
+
 #### Advisory online revocation
-Offline validation always runs first and decides on its own; the server can only add revocation or renewal signals, and the app decides whether an unreachable server fails open or closed.
+Offline validation always runs first and decides on its own; the server can only
+add revocation or renewal signals, and the app decides whether an unreachable
+server fails open or closed.
+
 #### Signed server replies
-Status answers are signed, tied to the exact license shown and a fresh per-request number, expire after five minutes, and may only narrow (never widen) the feature list; unsigned answers are ignored entirely.
+Status answers are signed, tied to the exact license shown and a fresh per-request number,
+expire after five minutes, and may only narrow (never widen) the feature list;
+unsigned answers are ignored entirely.
+
 #### Complete dev and red-team tooling
-A server-only license signer, a local test server, and an attacker simulator with a scorecard proving forged verdicts never yield a positive signal; no private keys are ever shipped inside the app.
+A server-only license signer, a local test server, and an attacker simulator with a scorecard
+proving forged verdicts never yield a positive signal; no private keys are ever shipped inside the app.
+
 #### Small footprint
-Two well-known cryptography libraries on a recent Nim toolchain, with network checks built on the standard library alone.
+Based on [JOSE](https://github.com/nimbase/jose) and [Nimcypher](https://github.com/nimbase/nimcypher),
+pure Nim cryptography libraries, with network checks built on the standard library alone.
+
 #### Optional tamper sensing
-The app can ask to be told when a debugger is attached and shut itself down; developers can switch this off for everyday work. It slows casual tampering but is not a security boundary.
+The app can ask to be told when a debugger is attached and shut itself down; developers
+can switch this off for everyday work. It slows casual tampering but is not a security boundary.
 
 ## Examples
 Offline validation (deterministic, no network):
