@@ -14,15 +14,35 @@
 
 
 ## Features
-- Ed25519-only compact JWS verification: `allowAlgs = [EdDSA]`, `kid` allowlist lookup, signature verified before any claim is trusted.
-- Strict claims profile: required `iss`, `aud`, `sub`, `jti`, `plan`, `customer_id`, `iat`, `exp`; `JInt`-only timestamps; duplicate top-level members rejected; 8KB token cap.
-- Client-capped lifetime: 90-day `MaxOfflineLifetime`, 60s clock leeway, future-`iat` guard; over-long tokens return `lifetimeTooLong` even with a valid signature.
-- Binding schema reserved: `binding: {"type": "none"}` enforced in Phase 1; `ed25519` device binding returns `unsupportedBinding` until enforcement lands.
-- Advisory online layer: deterministic offline check plus `CombinedResult{offline, online}` revocation signals keyed by `jti`; fail-open default with explicit `isAccepted()` gate.
-- Signed status replies: `POST /v1/licenses/verify` with `{jti, license_hash, nonce}` returns compact JWS (EdDSA, same license key); client enforces signature, `iss`/`aud`, nonce and hash binding, 300s freshness window, and reply-features-subset-of-license; bare `{"status": ...}` is never honored.
-- Dev tooling included: server-only `tools/mint_license.nim` signer, stdlib-only `tools/mock_server.nim` with `tools/revocations.json` seed; adversarial `tools/hacker_server.nim` + `tools/redteam.nim` oracle proving forged verdicts never yield a positive signal while R2t random-key license tokens stay denied offline; no private keys ship in the binary.
-- Minimal dependencies: `jose#HEAD` + `nimcypher >= 0.2.4` on Nim `>= 2.2.12`; online transport is stdlib HTTP only.
-- Opt-in anti-debug gate: `enforceNoDebugger()` raises `DebuggerDetected` (app terminates); `-d:softkeyNoAntidebug` bypasses for dev work; tamper resistance only, not a trust boundary.
+- Signature-first license checks
+- Strict, predictable license contents
+- Client-side lifetime limits
+- Reserved device binding
+- Advisory online revocation
+- Signed server replies with enforced feature narrowing
+- Complete dev and red-team tooling, no shipped secrets
+- Small footprint on the standard library
+- Optional tamper sensing with a dev bypass
+
+## Feature details
+#### Signature-first license checks
+Every license is verified as a tamper-proof signed token against an approved key list before any of its contents are trusted.
+#### Strict, predictable license contents
+All required fields must be present and correctly typed, duplicate entries are rejected, and oversized tokens are refused.
+#### Client-side lifetime limits
+The app caps how long any license may last, with a small allowance for clock differences, so even a valid signature cannot grant a decades-long license.
+#### Reserved device binding
+Unbound licenses work today, while hardware-bound licenses are recognized as unsupported until that enforcement is built.
+#### Advisory online revocation
+Offline validation always runs first and decides on its own; the server can only add revocation or renewal signals, and the app decides whether an unreachable server fails open or closed.
+#### Signed server replies
+Status answers are signed, tied to the exact license shown and a fresh per-request number, expire after five minutes, and may only narrow (never widen) the feature list; unsigned answers are ignored entirely.
+#### Complete dev and red-team tooling
+A server-only license signer, a local test server, and an attacker simulator with a scorecard proving forged verdicts never yield a positive signal; no private keys are ever shipped inside the app.
+#### Small footprint
+Two well-known cryptography libraries on a recent Nim toolchain, with network checks built on the standard library alone.
+#### Optional tamper sensing
+The app can ask to be told when a debugger is attached and shut itself down; developers can switch this off for everyday work. It slows casual tampering but is not a security boundary.
 
 ## Examples
 Offline validation (deterministic, no network):
