@@ -51,7 +51,10 @@ Offline validation (deterministic, no network):
 import std/times
 import softkey
 
+# the single approved signing key, selected by its id
 let keys = @[TrustedKey(kid: "license-signing-key-2026-01", pubkey: prodPub)]
+
+# checks the license signature, claims, and lifetime, all offline
 let (status, lic) = validateLicenseOffline(token, keys,
   "your-company", "your-product", getTime().toUnix())
 if status != valid:
@@ -69,9 +72,15 @@ import softkey
 
 let keys = @[TrustedKey(kid: "license-signing-key-2026-01", pubkey: prodPub)]
 let now = getTime().toUnix()
+
+# checks the revocation server address and the fail-open policy
 let policy = defaultOnlinePolicy("http://127.0.0.1:18080")
+
+# checks signed server replies against the trusted keys
 let checker = httpOnlineChecker(policy, keys, "your-company",
   "your-product")
+
+# checks offline validity first, then layers the online verdict on top
 let res = validateLicense(token, keys, "your-company",
   "your-product", now, some(checker), policy)
 if res.offline != valid or not isAccepted(res, policy):
@@ -115,6 +124,7 @@ try:
   let (status, lic) = validateLicenseOffline(token, keys,
     "your-company", "your-product", now,
     defaultAntiDebugPolicy())
+
   # Or combined with online revocation (checker/policy as above):
   # let res = validateLicense(token, keys, "your-company",
   #   "your-product", now, some(checker), policy,
