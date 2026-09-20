@@ -3,6 +3,10 @@ nimcache/
 nimblecache/
 htmldocs/
 testresults/
+/mock_server
+/hacker_server
+/redteam
+/mint_license
 /tests/*
 !/tests/bench
 !/tests/*.nim
